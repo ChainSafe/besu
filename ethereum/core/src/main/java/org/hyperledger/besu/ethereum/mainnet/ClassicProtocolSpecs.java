@@ -60,32 +60,9 @@ public class ClassicProtocolSpecs {
 
     return tangerineWhistleDefinition(chainId, OptionalInt.empty(), configStackSizeLimit)
         .gasCalculator(SpuriousDragonGasCalculator::new)
-        //            .skipZeroBlockRewards(true)
-        //            .messageCallProcessorBuilder(MainnetMessageCallProcessor::new)
-        //            .contractCreationProcessorBuilder(
-        //                    (gasCalculator, evm) ->
-        //                            new MainnetContractCreationProcessor(
-        //                                    gasCalculator,
-        //                                    evm,
-        //                                    true,
-        //
-        // Collections.singletonList(MaxCodeSizeRule.of(contractSizeLimit)),
-        //                                    1))
+        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_DELAYED)
         .transactionValidatorBuilder(
             gasCalculator -> new MainnetTransactionValidator(gasCalculator, true, chainId))
-        //            .transactionProcessorBuilder(
-        //                    (gasCalculator,
-        //                     transactionValidator,
-        //                     contractCreationProcessor,
-        //                     messageCallProcessor) ->
-        //                            new MainnetTransactionProcessor(
-        //                                    gasCalculator,
-        //                                    transactionValidator,
-        //                                    contractCreationProcessor,
-        //                                    messageCallProcessor,
-        //                                    true,
-        //                                    stackSizeLimit,
-        //                                    Account.DEFAULT_VERSION))
         .name("DieHard");
   }
 
@@ -94,7 +71,7 @@ public class ClassicProtocolSpecs {
       final OptionalInt contractSizeLimit,
       final OptionalInt configStackSizeLimit) {
     return MainnetProtocolSpecs.tangerineWhistleDefinition(contractSizeLimit, configStackSizeLimit)
-        .difficultyCalculator(MainnetDifficultyCalculators.DIFFICULTY_BOMB_REMOVED)
+        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_REMOVED)
         .transactionValidatorBuilder(
             gasCalculator -> new MainnetTransactionValidator(gasCalculator, true, chainId))
         .name("DefuseDifficultyBomb");

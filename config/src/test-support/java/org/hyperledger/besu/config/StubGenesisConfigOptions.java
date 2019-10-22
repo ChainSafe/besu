@@ -40,6 +40,7 @@ public class StubGenesisConfigOptions implements GenesisConfigOptions {
   private OptionalLong aghartaBlockNumber = OptionalLong.empty();
   private OptionalLong ecip1015BlockNumber = OptionalLong.empty();
   private OptionalLong diehardBlockNumber = OptionalLong.empty();
+  private OptionalLong gothamBlockNumber = OptionalLong.empty();
 
   @Override
   public String getConsensusEngine() {
@@ -114,6 +115,11 @@ public class StubGenesisConfigOptions implements GenesisConfigOptions {
   @Override
   public OptionalLong getDieHardBlockNumber() {
     return diehardBlockNumber;
+  }
+
+  @Override
+  public OptionalLong getGothamBlockNumber() {
+    return gothamBlockNumber;
   }
 
   @Override

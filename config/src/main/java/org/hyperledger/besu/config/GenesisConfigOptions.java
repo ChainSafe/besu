@@ -52,6 +52,8 @@ public interface GenesisConfigOptions {
 
   OptionalLong getDieHardBlockNumber();
 
+  OptionalLong getGothamBlockNumber();
+
   OptionalLong getByzantiumBlockNumber();
 
   OptionalLong getConstantinopleBlockNumber();

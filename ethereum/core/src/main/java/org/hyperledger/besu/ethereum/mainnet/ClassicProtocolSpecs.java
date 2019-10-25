@@ -14,9 +14,6 @@
  */
 package org.hyperledger.besu.ethereum.mainnet;
 
-import org.hyperledger.besu.ethereum.core.Account;
-import org.hyperledger.besu.ethereum.vm.MessageFrame;
-
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.OptionalInt;

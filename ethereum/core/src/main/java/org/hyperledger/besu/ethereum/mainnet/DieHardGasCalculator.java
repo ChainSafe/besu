@@ -14,4 +14,13 @@
  */
 package org.hyperledger.besu.ethereum.mainnet;
 
-public class DieHardGasCalculator extends SpuriousDragonGasCalculator {}
+import org.hyperledger.besu.ethereum.core.Gas;
+
+public class DieHardGasCalculator extends TangerineWhistleGasCalculator {
+    private static final Gas EXP_OPERATION_BYTE_GAS_COST = Gas.of(50L);
+
+    @Override
+    protected Gas expOperationByteGasCost() {
+        return EXP_OPERATION_BYTE_GAS_COST;
+    }
+}

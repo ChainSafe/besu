@@ -2,6 +2,7 @@
   "config": {
     "chainId": 61,
     "homesteadBlock": 1150000,
+    "classicForkBlock": 1920000,
     "ecip1015Block": 2500000,
     "eip150Hash": "0xca12c63534f565899681965528d536c52cb05b7c48e269c2a6cb77ad864d878a",
     "diehardBlock": 3000000,

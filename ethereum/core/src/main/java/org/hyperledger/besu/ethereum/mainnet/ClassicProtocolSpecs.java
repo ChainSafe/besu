@@ -14,13 +14,14 @@
  */
 package org.hyperledger.besu.ethereum.mainnet;
 
+import org.hyperledger.besu.ethereum.core.Wei;
+
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 public class ClassicProtocolSpecs {
-
-  public static final int SPURIOUS_DRAGON_CONTRACT_SIZE_LIMIT = 24576;
+  private static final Wei GOTHAM_BLOCK_REWARD = Wei.fromEth(4);
 
   public static ProtocolSpecBuilder<Void> tangerineWhistleDefinition(
       final Optional<BigInteger> chainId,
@@ -28,9 +29,17 @@ public class ClassicProtocolSpecs {
       final OptionalInt configStackSizeLimit) {
     return MainnetProtocolSpecs.homesteadDefinition(contractSizeLimit, configStackSizeLimit)
         .gasCalculator(TangerineWhistleGasCalculator::new)
+        //        .blockHeaderValidatorBuilder(MainnetBlockHeaderValidator::createClassicValidator)
         .transactionValidatorBuilder(
             gasCalculator -> new MainnetTransactionValidator(gasCalculator, true, chainId))
         .name("ClassicTangerineWhistle");
+  }
+
+  public static ProtocolSpecBuilder<Void> classicRecoveryInitDefinition(
+      final OptionalInt contractSizeLimit, final OptionalInt configStackSizeLimit) {
+    return MainnetProtocolSpecs.homesteadDefinition(contractSizeLimit, configStackSizeLimit)
+        .blockHeaderValidatorBuilder(MainnetBlockHeaderValidator::createClassicValidator)
+        .name("ClassicRecoveryInit");
   }
 
   public static ProtocolSpecBuilder<Void> dieHardDefinition(
@@ -56,12 +65,12 @@ public class ClassicProtocolSpecs {
         .name("DefuseDifficultyBomb");
   }
 
-  // TODO edwardmack, replace with real gotham ecip-1017 spec
   public static ProtocolSpecBuilder<Void> gothamDefinition(
       final Optional<BigInteger> chainId,
       final OptionalInt contractSizeLimit,
       final OptionalInt configStackSizeLimit) {
     return defuseDifficultyBombDefinition(chainId, contractSizeLimit, configStackSizeLimit)
+        .blockReward(GOTHAM_BLOCK_REWARD)
         .name("Gotham");
   }
 

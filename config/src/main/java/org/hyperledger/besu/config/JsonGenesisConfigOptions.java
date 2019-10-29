@@ -130,6 +130,11 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
   }
 
   @Override
+  public OptionalLong getClassicForkBlock() {
+    return getOptionalLong("classicforkblock");
+  }
+
+  @Override
   public OptionalLong getTangerineWhistleBlockNumber() {
     return getOptionalLong("eip150block");
   }

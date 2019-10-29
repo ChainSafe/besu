@@ -44,6 +44,8 @@ public interface GenesisConfigOptions {
 
   OptionalLong getDaoForkBlock();
 
+  OptionalLong getClassicForkBlock();
+
   OptionalLong getTangerineWhistleBlockNumber();
 
   OptionalLong getEcip1015BlockNumber();

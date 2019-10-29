@@ -114,6 +114,21 @@ public class ProtocolScheduleBuilder<C> {
         config.getTangerineWhistleBlockNumber(),
         MainnetProtocolSpecs.tangerineWhistleDefinition(
             config.getContractSizeLimit(), config.getEvmStackSize()));
+
+    config
+        .getClassicForkBlock()
+        .ifPresent(
+            classicBlockNumber -> {
+              final ProtocolSpec<C> originalProtocolSpce =
+                  protocolSchedule.getByBlockNumber(classicBlockNumber);
+              addProtocolSpec(
+                  protocolSchedule,
+                  OptionalLong.of(classicBlockNumber),
+                  ClassicProtocolSpecs.classicRecoveryInitDefinition(
+                      config.getContractSizeLimit(), config.getEvmStackSize()));
+              protocolSchedule.putMilestone(classicBlockNumber + 10, originalProtocolSpce);
+            });
+
     addProtocolSpec(
         protocolSchedule,
         config.getEcip1015BlockNumber(),

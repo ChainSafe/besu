@@ -41,6 +41,7 @@ public class StubGenesisConfigOptions implements GenesisConfigOptions {
   private OptionalLong ecip1015BlockNumber = OptionalLong.empty();
   private OptionalLong diehardBlockNumber = OptionalLong.empty();
   private OptionalLong gothamBlockNumber = OptionalLong.empty();
+  private OptionalLong classicForkBlock = OptionalLong.empty();
 
   @Override
   public String getConsensusEngine() {
@@ -95,6 +96,11 @@ public class StubGenesisConfigOptions implements GenesisConfigOptions {
   @Override
   public OptionalLong getDaoForkBlock() {
     return daoForkBlock;
+  }
+
+  @Override
+  public OptionalLong getClassicForkBlock() {
+    return classicForkBlock;
   }
 
   @Override

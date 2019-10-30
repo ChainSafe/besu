@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public class ClassicProtocolSpecs {
-  private static final Wei GOTHAM_BLOCK_REWARD = Wei.fromEth(4);
+  private static final Wei MAX_BLOCK_REWARD = Wei.fromEth(5);
 
   public static ProtocolSpecBuilder<Void> tangerineWhistleDefinition(
       final Optional<BigInteger> chainId,
@@ -48,30 +48,43 @@ public class ClassicProtocolSpecs {
       final OptionalInt configStackSizeLimit) {
     return tangerineWhistleDefinition(chainId, OptionalInt.empty(), configStackSizeLimit)
         .gasCalculator(DieHardGasCalculator::new)
-        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_DELAYED)
+        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_PAUSED)
         .transactionValidatorBuilder(
             gasCalculator -> new MainnetTransactionValidator(gasCalculator, true, chainId))
         .name("DieHard");
-  }
-
-  public static ProtocolSpecBuilder<Void> defuseDifficultyBombDefinition(
-      final Optional<BigInteger> chainId,
-      final OptionalInt contractSizeLimit,
-      final OptionalInt configStackSizeLimit) {
-    return dieHardDefinition(chainId, contractSizeLimit, configStackSizeLimit)
-        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_REMOVED)
-        .transactionValidatorBuilder(
-            gasCalculator -> new MainnetTransactionValidator(gasCalculator, true, chainId))
-        .name("DefuseDifficultyBomb");
   }
 
   public static ProtocolSpecBuilder<Void> gothamDefinition(
       final Optional<BigInteger> chainId,
       final OptionalInt contractSizeLimit,
       final OptionalInt configStackSizeLimit) {
-    return defuseDifficultyBombDefinition(chainId, contractSizeLimit, configStackSizeLimit)
-        .blockReward(GOTHAM_BLOCK_REWARD)
+    return dieHardDefinition(chainId, contractSizeLimit, configStackSizeLimit)
+        .blockReward(MAX_BLOCK_REWARD)
+        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_DELAYED)
+        .blockProcessorBuilder(
+            (transactionProcessor,
+                transactionReceiptFactory,
+                blockReward,
+                miningBeneficiaryCalculator,
+                skipZeroBlockRewards) ->
+                new ClassicBlockProcessor(
+                    transactionProcessor,
+                    transactionReceiptFactory,
+                    blockReward,
+                    miningBeneficiaryCalculator,
+                    skipZeroBlockRewards))
         .name("Gotham");
+  }
+
+  public static ProtocolSpecBuilder<Void> defuseDifficultyBombDefinition(
+      final Optional<BigInteger> chainId,
+      final OptionalInt contractSizeLimit,
+      final OptionalInt configStackSizeLimit) {
+    return gothamDefinition(chainId, contractSizeLimit, configStackSizeLimit)
+        .difficultyCalculator(ClassicDifficultyCalculators.DIFFICULTY_BOMB_REMOVED)
+        .transactionValidatorBuilder(
+            gasCalculator -> new MainnetTransactionValidator(gasCalculator, true, chainId))
+        .name("DefuseDifficultyBomb");
   }
 
   // TODO edwardmack, this is just a place holder definiton, REPLACE with real definition

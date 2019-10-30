@@ -27,6 +27,19 @@ public abstract class ClassicDifficultyCalculators {
   private static final long EXPONENTIAL_DIFF_PERIOD = 100_000L;
   private static final long PAUSE_BLOCK = 3_000_000L;
   private static final long FIXED_DIFF = PAUSE_BLOCK / EXPONENTIAL_DIFF_PERIOD;
+  private static final long CONTINUE_BLOCK = 5_000_000L;
+  private static final long DELAY = (CONTINUE_BLOCK - PAUSE_BLOCK) / EXPONENTIAL_DIFF_PERIOD;
+
+  public static DifficultyCalculator<Void> DIFFICULTY_BOMB_PAUSED =
+      (time, parent, protocolContext) -> {
+        final BigInteger parentDifficulty = difficulty(parent.getDifficulty());
+        final BigInteger difficulty =
+            ensureMinimumDifficulty(
+                BigInteger.valueOf(Math.max(1 - (time - parent.getTimestamp()) / 10, -99L))
+                    .multiply(parentDifficulty.divide(DIFFICULTY_BOUND_DIVISOR))
+                    .add(parentDifficulty));
+        return adjustForDifficultyPause(FIXED_DIFF, difficulty);
+      };
 
   public static DifficultyCalculator<Void> DIFFICULTY_BOMB_DELAYED =
       (time, parent, protocolContext) -> {
@@ -36,7 +49,8 @@ public abstract class ClassicDifficultyCalculators {
                 BigInteger.valueOf(Math.max(1 - (time - parent.getTimestamp()) / 10, -99L))
                     .multiply(parentDifficulty.divide(DIFFICULTY_BOUND_DIVISOR))
                     .add(parentDifficulty));
-        return adjustForDifficultyDelay(FIXED_DIFF, difficulty);
+        final long periodCount = (parent.getNumber() + 1) / EXPONENTIAL_DIFF_PERIOD;
+        return adjustForDifficultyDelay(periodCount, difficulty);
       };
 
   public static DifficultyCalculator<Void> DIFFICULTY_BOMB_REMOVED =
@@ -50,9 +64,14 @@ public abstract class ClassicDifficultyCalculators {
         return difficulty;
       };
 
-  private static BigInteger adjustForDifficultyDelay(
+  private static BigInteger adjustForDifficultyPause(
       final long periodCount, final BigInteger difficulty) {
     return difficulty.add(BIGINT_2.pow(Ints.checkedCast(periodCount - 2)));
+  }
+
+  private static BigInteger adjustForDifficultyDelay(
+      final long periodCount, final BigInteger difficulty) {
+    return difficulty.add(BIGINT_2.pow(Ints.checkedCast(periodCount - DELAY - 2)));
   }
 
   private static BigInteger ensureMinimumDifficulty(final BigInteger difficulty) {

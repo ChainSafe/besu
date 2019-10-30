@@ -46,7 +46,7 @@ public class ClassicForkPeerValidator extends AbstractPeerBlockValidator {
     final boolean validClassicBlock =
         MainnetBlockHeaderValidator.validateHeaderForClassicFork(header);
     if (!validClassicBlock) {
-      LOG.debug("Peer {} is invalid because Classic block ({}) is invalid.", ethPeer, blockNumber);
+      LOG.info("Peer {} is invalid because Classic block ({}) is invalid.", ethPeer, blockNumber);
     }
     return validClassicBlock;
   }

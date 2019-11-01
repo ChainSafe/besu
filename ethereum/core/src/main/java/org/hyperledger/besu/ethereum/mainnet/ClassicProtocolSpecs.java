@@ -19,8 +19,6 @@ import org.hyperledger.besu.ethereum.core.TransactionReceipt;
 import org.hyperledger.besu.ethereum.core.Wei;
 import org.hyperledger.besu.ethereum.core.WorldState;
 import org.hyperledger.besu.ethereum.mainnet.contractvalidation.MaxCodeSizeRule;
-import org.hyperledger.besu.ethereum.privacy.PrivateTransactionProcessor;
-import org.hyperledger.besu.ethereum.privacy.PrivateTransactionValidator;
 import org.hyperledger.besu.ethereum.vm.MessageFrame;
 
 import java.math.BigInteger;
@@ -100,44 +98,42 @@ public class ClassicProtocolSpecs {
       final OptionalInt configStackSizeLimit,
       final boolean enableRevertReason) {
     final int contractSizeLimit =
-            configContractSizeLimit.orElse(MainnetProtocolSpecs.SPURIOUS_DRAGON_CONTRACT_SIZE_LIMIT);
+        configContractSizeLimit.orElse(MainnetProtocolSpecs.SPURIOUS_DRAGON_CONTRACT_SIZE_LIMIT);
     final int stackSizeLimit = configStackSizeLimit.orElse(MessageFrame.DEFAULT_MAX_STACK_SIZE);
     return gothamDefinition(chainId, configContractSizeLimit, configStackSizeLimit)
-            .evmBuilder(MainnetEvmRegistries::byzantium)
-            .skipZeroBlockRewards(true)
-            .messageCallProcessorBuilder(
-                    (evm, precompileContractRegistry) ->
-                            new MainnetMessageCallProcessor(
-                                    evm,
-                                    precompileContractRegistry))
-            .precompileContractRegistryBuilder(MainnetPrecompiledContractRegistries::byzantium)
-            .difficultyCalculator(ClassicDifficultyCalculators.EIP100)
-            .transactionReceiptFactory(
-                    enableRevertReason
-                            ? ClassicProtocolSpecs::byzantiumTransactionReceiptFactoryWithReasonEnabled
-                            : ClassicProtocolSpecs::byzantiumTransactionReceiptFactory)
-            .contractCreationProcessorBuilder(
-                    (gasCalculator, evm) ->
-                            new MainnetContractCreationProcessor(
-                                    gasCalculator,
-                                    evm,
-                                    true,
-                                    Collections.singletonList(MaxCodeSizeRule.of(contractSizeLimit)),
-                                    1))
-            .transactionProcessorBuilder(
-                    (gasCalculator,
-                     transactionValidator,
-                     contractCreationProcessor,
-                     messageCallProcessor) ->
-                            new MainnetTransactionProcessor(
-                                    gasCalculator,
-                                    transactionValidator,
-                                    contractCreationProcessor,
-                                    messageCallProcessor,
-                                    true,
-                                    stackSizeLimit,
-                                    Account.DEFAULT_VERSION))
-            .name("Atlantis");
+        .evmBuilder(MainnetEvmRegistries::byzantium)
+        .skipZeroBlockRewards(true)
+        .messageCallProcessorBuilder(
+            (evm, precompileContractRegistry) ->
+                new MainnetMessageCallProcessor(evm, precompileContractRegistry))
+        .precompileContractRegistryBuilder(MainnetPrecompiledContractRegistries::byzantium)
+        .difficultyCalculator(ClassicDifficultyCalculators.EIP100)
+        .transactionReceiptFactory(
+            enableRevertReason
+                ? ClassicProtocolSpecs::byzantiumTransactionReceiptFactoryWithReasonEnabled
+                : ClassicProtocolSpecs::byzantiumTransactionReceiptFactory)
+        .contractCreationProcessorBuilder(
+            (gasCalculator, evm) ->
+                new MainnetContractCreationProcessor(
+                    gasCalculator,
+                    evm,
+                    true,
+                    Collections.singletonList(MaxCodeSizeRule.of(contractSizeLimit)),
+                    1))
+        .transactionProcessorBuilder(
+            (gasCalculator,
+                transactionValidator,
+                contractCreationProcessor,
+                messageCallProcessor) ->
+                new MainnetTransactionProcessor(
+                    gasCalculator,
+                    transactionValidator,
+                    contractCreationProcessor,
+                    messageCallProcessor,
+                    true,
+                    stackSizeLimit,
+                    Account.DEFAULT_VERSION))
+        .name("Atlantis");
   }
 
   // TODO edwardmack, this is just a place holder definiton, REPLACE with real definition
@@ -146,19 +142,20 @@ public class ClassicProtocolSpecs {
       final OptionalInt configContractSizeLimit,
       final OptionalInt configStackSizeLimit,
       final boolean enableRevertReason) {
-    return atlantisDefinition(chainId, configContractSizeLimit, configStackSizeLimit, enableRevertReason)
+    return atlantisDefinition(
+            chainId, configContractSizeLimit, configStackSizeLimit, enableRevertReason)
         .name("Agharta");
   }
 
   private static TransactionReceipt byzantiumTransactionReceiptFactory(
-          final TransactionProcessor.Result result, final WorldState worldState, final long gasUsed) {
+      final TransactionProcessor.Result result, final WorldState worldState, final long gasUsed) {
     return new TransactionReceipt(
-            result.isSuccessful() ? 1 : 0, gasUsed, result.getLogs(), Optional.empty());
+        result.isSuccessful() ? 1 : 0, gasUsed, result.getLogs(), Optional.empty());
   }
 
   private static TransactionReceipt byzantiumTransactionReceiptFactoryWithReasonEnabled(
-          final TransactionProcessor.Result result, final WorldState worldState, final long gasUsed) {
+      final TransactionProcessor.Result result, final WorldState worldState, final long gasUsed) {
     return new TransactionReceipt(
-            result.isSuccessful() ? 1 : 0, gasUsed, result.getLogs(), result.getRevertReason());
+        result.isSuccessful() ? 1 : 0, gasUsed, result.getLogs(), result.getRevertReason());
   }
 }

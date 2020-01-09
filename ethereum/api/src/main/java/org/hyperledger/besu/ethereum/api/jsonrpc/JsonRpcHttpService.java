@@ -269,42 +269,37 @@ public class JsonRpcHttpService {
     return router;
   }
 
-  private HttpServerOptions getHttpServerOptions() {
-    final HttpServerOptions httpServerOptions =
-        new HttpServerOptions()
-            .setHost(config.getHost())
-            .setPort(config.getPort())
-            .setHandle100ContinueAutomatically(true);
+    final CompletableFuture<?> resultFuture = new CompletableFuture<>();
+    httpServer
+        .requestHandler(router)
+        .listen(
+            res -> {
+              if (!res.failed()) {
+                resultFuture.complete(null);
+                final int actualPort = httpServer.actualPort();
+                LOG.info(
+                    "JsonRPC service started and listening on {}:{}", config.getHost(), actualPort);
+                config.setPort(actualPort);
 
-    return applyTlsConfig(httpServerOptions);
-  }
+                natService.ifNatEnvironment(
+                    NatMethod.UPNP,
+                    natManager -> {
+                      ((UpnpNatManager) natManager)
+                          .requestPortForward(
+                              config.getPort(), NetworkProtocol.TCP, NatServiceType.JSON_RPC);
+                    });
 
-  private HttpServerOptions applyTlsConfig(final HttpServerOptions httpServerOptions) {
-    config
-        .getTlsConfiguration()
-        .ifPresent(
-            tlsConfiguration -> {
-              try {
-                httpServerOptions
-                    .setSsl(true)
-                    .setPfxKeyCertOptions(
-                        new PfxOptions()
-                            .setPath(tlsConfiguration.getKeyStorePath().toString())
-                            .setPassword(tlsConfiguration.getKeyStorePassword()));
-
-                tlsConfiguration
-                    .getKnownClientsFile()
-                    .ifPresent(
-                        knownClientsFile ->
-                            httpServerOptions
-                                .setClientAuth(ClientAuth.REQUIRED)
-                                .setTrustOptions(
-                                    VertxTrustOptions.whitelistClients(knownClientsFile)));
-              } catch (final RuntimeException re) {
-                throw new JsonRpcServiceException(
-                    String.format(
-                        "TLS options failed to initialise for Ethereum JSON RPC listener: %s",
-                        re.getMessage()));
+                return;
+              }
+              httpServer = null;
+              final Throwable cause = res.cause();
+              if (cause instanceof SocketException) {
+                resultFuture.completeExceptionally(
+                    new JsonRpcServiceException(
+                        String.format(
+                            "Failed to bind Ethereum JSON RPC listener to %s:%s: %s",
+                            config.getHost(), config.getPort(), cause.getMessage())));
+                return;
               }
             });
     return httpServerOptions;

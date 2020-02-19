@@ -14,7 +14,10 @@
  */
 package org.hyperledger.besu.ethereum.mainnet;
 
+import org.hyperledger.besu.ethereum.core.Account;
 import org.hyperledger.besu.ethereum.core.Gas;
+
+import org.apache.tuweni.units.bigints.UInt256;
 
 /*
  * This class implements changes to gas calculation for ECIP-1061 https://ecips.ethereumclassic.org/ECIPs/ecip-1061
